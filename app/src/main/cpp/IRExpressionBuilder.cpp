@@ -1,13 +1,61 @@
+#include <utility>
 #include <vector>
-#include "IRBuilder.hpp"
+
+class IrCommand {
+private:
+    int frequency;
+    std::vector<int> pattern;
+
+public:
+    IrCommand(int frequency, std::vector<int> pattern)
+            : frequency(frequency), pattern(std::move(pattern)) {}
+};
+
+
 
 class IRExpressionBuilder {
-    long TOP_BIT_32 = 0x1L; // 32-bit
-    long TOP_BIT_64 = 0x1L; // 64-bit
+public:
+    static const long TOP_BIT_32 = 0x1L << 31;
+    static const long TOP_BIT_64 = 0x1L << 63;
 
+private:
     int frequency;
-    bool lastMark;
     std::vector<int> buffer;
+    bool lastMark;
+
+public:
+    static IRExpressionBuilder irCommandBuilder(int frequency) {
+        return IRExpressionBuilder(frequency);
+    }
+
+    explicit IRExpressionBuilder(int frequencyKHz)
+            : frequency(frequencyKHz), lastMark(false) {}
+
+    IRExpressionBuilder& appendSymbol(bool mark, int interval) {
+        if (lastMark != mark) {
+            buffer.push_back(interval);
+            lastMark = mark;
+        } else {
+            buffer[buffer.size() - 1] += interval;
+        }
+        return *this;
+    }
+
+    IRExpressionBuilder& mark(int interval) {
+        return appendSymbol(true, interval);
+    }
+
+    IRExpressionBuilder& space(int interval) {
+        return appendSymbol(false, interval);
+    }
+
+    IRExpressionBuilder& pair(int on, int off) {
+        return mark(on).space(off);
+    }
+
+    IRExpressionBuilder& reversePair(int off, int on) {
+        return space(off).mark(on);
+    }
 
     class SequenceDefinition {
     public:
@@ -16,6 +64,7 @@ class IRExpressionBuilder {
     };
 
     class SimpleSequence : public SequenceDefinition {
+    private:
         int oneMark, oneSpace, zeroMark, zeroSpace;
 
     public:
@@ -31,51 +80,19 @@ class IRExpressionBuilder {
         }
     };
 
-
-public:
-    IRExpressionBuilder() : frequency(), lastMark(false) {}
-
-    static IRExpressionBuilder irCommandBuilder(int frequency) {
-        return IRExpressionBuilder(frequency);
-    }
-
-    int getFrequency() {
-        return frequency;
-    }
-
-    std::vector<int> getBuffer() {
-        return buffer;
-    }
-
-    IRExpressionBuilder mark(int duration) {
-        return appendSymbol(true, duration);
-    }
-
-    IRExpressionBuilder space(int duration) {
-        return appendSymbol(false, duration);
-    }
-
-    IRExpressionBuilder pair(int on, int off) {
-        return mark(on).space(off);
-    }
-
-    IRExpressionBuilder reversePair(int on, int off) {
-        return space(on).mark(off);
-    }
-
     IRExpressionBuilder delay(int ms) {
         return space(ms * frequency / 1000);
     }
 
-    IRExpressionBuilder sequence(SequenceDefinition* definition, int length, int data) {
+    IRExpressionBuilder& sequence(SequenceDefinition* definition, int length, int data) {
         return sequence(definition, TOP_BIT_32, length, data);
     }
 
-    IRExpressionBuilder sequence(SequenceDefinition* definition, int length, long data) {
+    IRExpressionBuilder& sequence(SequenceDefinition* definition, int length, long data) {
         return sequence(definition, TOP_BIT_64, length, data);
     }
 
-    IRExpressionBuilder sequence(SequenceDefinition* definition, long topBit, int length, long data) {
+    IRExpressionBuilder& sequence(SequenceDefinition* definition, long topBit, int length, long data) {
         for (int index = 0; index < length; index++) {
             if ((data & topBit) != 0) {
                 definition->one(*this, index);
@@ -87,17 +104,27 @@ public:
         return *this;
     }
 
-    // TODO: IRBuilder::build() is not implemented
+    IrCommand build() {
+        return {frequency, buildSequence()};
+    }
 
     std::vector<int> buildSequence() {
-        return buildRawSequence(this->buffer);
+        return buffer;
     }
 
-    static std::vector<int> buildRawSequence(std::initializer_list<int> rawData) {
-        return std::vector<int>(rawData);
+    int getFrequency() const {
+        return frequency;
     }
 
-    static std::vector<int> buildRawSequence(const std::vector<int>& buffer) {
+    std::vector<int> getBuffer() {
+        return buffer;
+    }
+
+    static SimpleSequence* simpleSequence(int oneMark, int oneSpace, int zeroMark, int zeroSpace) {
+        return new SimpleSequence(oneMark, oneSpace, zeroMark, zeroSpace);
+    }
+
+    static std::vector<int> buildRawSequence(std::vector<int> buffer) {
         return buffer;
     }
 
@@ -106,21 +133,4 @@ public:
         return std::vector<int>(std::begin(dataStream), std::end(dataStream));
     }
 
-private:
-    IRExpressionBuilder(int frequencyKHz) {
-        this->frequency = frequencyKHz;
-        this->buffer = std::vector<int>();
-        this->lastMark = false;
-    }
-
-    IRExpressionBuilder appendSymbol(bool mark, int duration) {
-        if (lastMark != mark) {
-            buffer.push_back(duration);
-            lastMark = mark;
-        } else {
-            buffer[buffer.size() - 1] += duration;
-        }
-        return *this;
-    }
 };
-

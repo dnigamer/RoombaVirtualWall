@@ -9,6 +9,10 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         IRExpressionBuilder.cpp
         IRExpressionBuilder.hpp)
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    android
-    log)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+#target_link_libraries(${CMAKE_PROJECT_NAME}
+#    android
+#    log)
+
+target_link_libraries(${CMAKE_PROJECT_NAME})
