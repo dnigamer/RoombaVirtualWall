@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Roomba Virtual Wall</string>
     <string name="compatibility">Is your device compatible?</string>
@@ -10,5 +11,4 @@
     <string name="onIR">ON</string>
     <string name="offIR">OFF</string>
     <string name="notsupportedIR">NOT SUPPORTED</string>
-
 </resources>

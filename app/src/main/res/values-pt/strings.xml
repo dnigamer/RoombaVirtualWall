@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Parede virtual para Roomba</string>
+    <string name="compatibility">O teu dispositivo é compatível?</string>
+    <string name="check_compat">Verificar compatibilidade</string>
+    <string name="yesState">SIM!</string>
+    <string name="noState">NÃO!</string>
+    <string name="startIR">Iniciar parede virtual</string>
+    <string name="stopIR">Parar parede virtual</string>
+    <string name="stateIR">Estado da parede virtual</string>
+    <string name="onIR">LIGADA</string>
+    <string name="offIR">DESLIGADA</string>
+    <string name="notsupportedIR">NÃO COMPATÍVEL</string>
+</resources>
