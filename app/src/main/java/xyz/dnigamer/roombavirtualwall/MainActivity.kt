@@ -8,6 +8,11 @@ import android.widget.Button
 import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        init {
+            System.loadLibrary("rvwmain")
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,9 +40,9 @@ class MainActivity : AppCompatActivity() {
         val startBtn = findViewById<Button>(R.id.startIRButton)
         val stopBtn = findViewById<Button>(R.id.stopIRButton)
         val irstate = findViewById<TextView>(R.id.stateIRLabel)
-        val manager = getSystemService(Context.CONSUMER_IR_SERVICE) as? ConsumerIrManager
+        val manager = getSystemService(Context.CONSUMER_IR_SERVICE) as ConsumerIrManager
 
-        if (manager == null) {
+        if (!manager.hasIrEmitter()) {
             state.text = getString(R.string.noState)
             state.setTextColor(getColor(R.color.red))
             irstate.text = getString(R.string.notsupportedIR)
