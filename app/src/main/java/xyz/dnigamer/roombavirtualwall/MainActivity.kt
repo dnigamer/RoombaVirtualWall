@@ -17,10 +17,20 @@ class MainActivity : AppCompatActivity() {
             checkCompatibility()
         }
 
-        checkCompatibility()
+        if (checkCompatibility()) {
+            val startButton = findViewById<Button>(R.id.startIRButton)
+            startButton.setOnClickListener {
+                startIR()
+            }
+
+            val stopButton = findViewById<Button>(R.id.stopIRButton)
+            stopButton.setOnClickListener {
+                stopIR()
+            }
+        }
     }
 
-    private fun checkCompatibility() {
+    private fun checkCompatibility(): Boolean{
         val state = findViewById<TextView>(R.id.compStateLabel)
         val startBtn = findViewById<Button>(R.id.startIRButton)
         val stopBtn = findViewById<Button>(R.id.stopIRButton)
@@ -35,6 +45,7 @@ class MainActivity : AppCompatActivity() {
             startBtn.isClickable = false
             stopBtn.setBackgroundColor(getColor(R.color.primaryLight))
             stopBtn.isClickable = false
+            return false
         } else {
             state.text = getString(R.string.yesState)
             state.setTextColor(getColor(R.color.green))
@@ -42,6 +53,15 @@ class MainActivity : AppCompatActivity() {
             startBtn.isClickable = true
             stopBtn.setBackgroundColor(getColor(R.color.primary))
             stopBtn.isClickable = true
+            return true
         }
+    }
+
+    private fun startIR() {
+        // TODO: Implement IR transmission (send IR codes) - start
+    }
+
+    private fun stopIR() {
+        // TODO: Implement IR transmission (send IR codes) - stop
     }
 }
