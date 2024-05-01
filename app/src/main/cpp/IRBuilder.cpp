@@ -68,11 +68,11 @@ public:
     class RC5SequenceDefinition : public IRExpressionBuilder::SequenceDefinition {
     public:
         void one(IRExpressionBuilder& builder, int index) override {
-            builder.pair(RC5::T1, RC5::T1);
+            builder.pair(T1, T1);
         }
 
         void zero(IRExpressionBuilder& builder, int index) override {
-            builder.pair(RC5::T1, RC5::T1 * 3);
+            builder.pair(T1, T1 * 3);
         }
     };
 
