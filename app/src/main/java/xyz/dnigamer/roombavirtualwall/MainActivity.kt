@@ -4,15 +4,14 @@ import android.content.Context
 import android.hardware.ConsumerIrManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        init {
-            System.loadLibrary("rvwmain")
-        }
-    }
+    private var isRunning = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -62,11 +61,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.Default + job)
+
     private fun startIR() {
-        // TODO: Implement IR transmission (send IR codes) - start
+        if (!isRunning) {
+            val irState = findViewById<TextView>(R.id.stateIRLabel)
+            Log.d("IR", "IR is on")
+            isRunning = true
+            irState.text = getString(R.string.onIR)
+
+            val manager = getSystemService(Context.CONSUMER_IR_SERVICE) as ConsumerIrManager
+            val irExpression = IrExpression.NEC.buildNEC(32, 0xA2)
+            scope.launch {
+                while (isRunning) {
+                    delay(300) // replace 100 with the delay in milliseconds you want between each execution
+                    withContext(Dispatchers.Main) {
+                        manager.transmit(irExpression.frequency, irExpression.pattern)
+                    }
+                }
+            }
+        } else {
+            Log.d("IR", "IR is already on")
+        }
     }
 
     private fun stopIR() {
-        // TODO: Implement IR transmission (send IR codes) - stop
+        val irState = findViewById<TextView>(R.id.stateIRLabel)
+        isRunning = false
+        irState.text = getString(R.string.offIR)
+        Log.d("IR", "IR is off")
+        job.cancel() // cancel the coroutine when stopping IR
     }
 }
